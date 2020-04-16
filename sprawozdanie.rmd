@@ -13,6 +13,9 @@ spine <- read.csv("dataset-spine.csv")
 ```
 ## Wstęp
 Zadaniem było wykonanie analizy porównawczej metody wizualizacji PCA i LDA. Zadanie zostało wykonane na podstawie zbioru danych dotyczącego problemów z kręgosłupem. Zbiór posiada 2 klasy: normal i abnormal.
+```{r head}
+head(spine)
+```
 
 ## PCA
 
@@ -182,7 +185,28 @@ mean(predictions$class==test.transformed$class)
 
 Wizualizacja funkcji dyskryminacji:
 ```{r plot dicr function}
+plot_title <- ''
+plot(predictions$x[,1],
+     ylab="LD1", 
+     main=plot_title)
+grid(nx=NULL,
+     ny=NULL, 
+     col="lightgray", 
+     lty="dotted")
+text(predictions$x[,1], label="o", col=c(as.numeric(predictions$class)))
+abline(v=0, lty="dotted")
+abline(h=0, lty="dotted")
+```
 
+Wizualizacja współczynników modelu:
+```{r plot coefs}
+plot_title <- 'Współczynniki'
+barplot(c(coef(model)), main=plot_title, xlab = "coef", ylab = "LD1", ylim=c(-1,1))
+grid(nx=NULL,
+     ny=NULL, 
+     col="lightgray", 
+     lty="dotted")
+abline(v=0, lty="dotted", col=c(as.numeric(predictions$class)))
 ```
 
 ## Wnioski
@@ -190,10 +214,12 @@ Wizualizacja funkcji dyskryminacji:
 
 2. Algorytm PCA opiera się na jednej macierzy kowariancji, natomiat LDA korzysta z macierzy opisujących zmienność wewnątrzgrupową i międzygrupową.
 
-3. Wybraliśmy niestety zbiór, który okazał się trudny do liniowej eliminacji wymiarów i dla żadnej z metod nie otrzymaliśmy bardzo dobrych wyników.Jednak dla naszego modelu LDA lepiej sklasyfikowało dane.
+3. Wybraliśmy niestety zbiór, który okazał się trudny do skutecznej liniowej eliminacji wymiarów, jednak dla naszego modelu LDA lepiej sklasyfikowało dane.
 
 4. LDA zapewnia lepszą separację klas niż PCA. Dzieje się tak dlatego, że PCA skupia się przede wszystkim na śledzeniu wariancji danych, natomiast LDA na wariancjach międzyklasowych.
 
 5. LDA wymaga wcześniejszego przeprocesowania danych, przez co jest trudniejsze w użyciu. Równocześnie ze względu na jednowymiarowość wyników jest metodą trudną w prezentacji dla niewielkiej ilości klas.
 
-6. Przypuszczamy, że w większości sytuacji metoda LDA powinna dawać lepsze wyniki, jednakże wszystko zależy od omawianego przypadku i do każdego należy podejść indywidualnie.
+6. Dla metody LDA największy wpływ na klasyfikację miały atrybuty pelvic_radius oraz degree_spondylolisthesis.
+
+7. Przypuszczamy, że w większości sytuacji metoda LDA powinna dawać lepsze wyniki, jednakże wszystko zależy od omawianego przypadku i do każdego należy podejść indywidualnie.
