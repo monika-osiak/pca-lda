@@ -101,3 +101,22 @@ fviz_pca_ind(spine.pr,
                ggtitle("Dane z zaznaczonymi klasami") +
                theme(plot.title=element_text(hjust=0.5))
 ```
+
+## LDA
+
+Rozkład LDA dokonywany jest za pomocą metody `lda`.
+
+```{r}
+library(car)
+head(spine)
+```
+```{r}
+scatterplotMatrix(spine[c(1:12)])
+```
+```{r}
+library(MASS)
+spine.lda <- lda(class ~ ., data=spine)
+```
+```{r}
+spine.lda
+```
