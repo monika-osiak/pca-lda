@@ -31,12 +31,16 @@ test.transformed <- preproc.param %>% predict(test.data)
 require(MASS)
 # Fit the model
 
-model <- lda(formula=class~., data=spine)
-model
+model <- lda(formula=class~., data=train.transformed)
+print(model)
 plot(model)
+
 # Make predictions
 predictions <- model %>% predict(train.transformed)
 # Model accuracy
 mean(predictions$class==test.transformed$class)
 
-predictions <- model %>% predict(test.transformed)
+lda.data <- cbind(train.transformed, predict(model)$x)
+#ggplot(lda.data, aes(LD1, LD2)) + geom_point(aes(color = class))
+#tu nie ma LD2 z jakiegos powodu
+print(ggplot(lda.data, aes(LD1,LD2)) + geom_point(aes(color = class)))
