@@ -11,6 +11,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 spine <- read.csv("dataset-spine.csv")
 ```
+## Wstęp
+Zadaniem było wykonanie analizy porównawczej metody wizualizacji PCA i LDA. Zadanie zostało wykonane na podstawie zbioru danych dotyczącego problemów z kręgosłupem. Zbiór posiada 2 klasy: normal i abnormal.
 
 ## PCA
 
@@ -111,24 +113,22 @@ library(tidyverse)
 library(caret)
 theme_set(theme_classic())
 ```
-Na początku załadowaliśmy dane ze wszystkimi kolumnamie -- również z podziałem na klasy.
 
-```{r loading data}
+Zaczynamy od załadowania zbioru i policzenia wariancji.
+
+
+```{r load and variance}
 spine <- read.csv("dataset-spine.csv")[c(1:13)]
 spine.pr <- prcomp(spine[c(1:12)], 
                    center=TRUE, 
                    scale=TRUE)
-```
 
-Następnie obliczamy wariancję w dwóch pierwszych składnikach wiodących.
-
-```{r variance}
 l1_var <- as.double(summary(spine.pr)$importance[,1][2])
 l2_var <- as.double(summary(spine.pr)$importance[,2][2])
+
 print(sprintf('Wariancja danych zawarta w pierwszym skĹ‚adniku wiodÄ…cym: %s%%', format(round(l1_var, 2), nsmall = 2)))
 print(sprintf('Wariancja danych zawarta w drugim skĹ‚adniku wiodÄ…cym: %s%%', format(round(l2_var, 2), nsmall = 2)))
 ```
-
 Kolejnym krokiem jest podział zbioru na treningowy (80%) i testowy (20%).
 
 ```{r divide set}
@@ -138,26 +138,49 @@ training.samples <- spine$class %>%
 
 train.data <- spine[training.samples, ]
 test.data <- spine[-training.samples, ]
+```
 
-# Estimate preprocessing parameters
+Estymacja parametrów przeprocesowania: 
+
+```{r estimation}
 preproc.param <- train.data %>% 
   preProcess(method = c("center", "scale"))
+```
 
-# Transform the data using the estimated parameters
+Transformacja danych przy użyciu estymowanych parametrów
+
+```{r transform}
 train.transformed <- preproc.param %>% predict(train.data)
 test.transformed <- preproc.param %>% predict(test.data)
-
 require(MASS)
-# Fit the model
-
-model <- lda(formula=class~., data=spine)
-model
-plot(model)
-# Make predictions
-predictions <- model %>% predict(train.transformed)
-# Model accuracy
-mean(predictions$class==test.transformed$class)
-
-predictions <- model %>% predict(test.transformed)
-
 ```
+
+
+Dopasowanie modelu:
+```{r fitting}
+model <- lda(formula=class~., data=train.transformed)
+print(model)
+plot(model)
+```
+
+Wykonanie predykcji:
+```{r prediction2}
+predictions <- model %>% predict(train.transformed)
+```
+
+Wyznaczenie precyzji predykcji modelu:
+```{r prediction}
+mean(predictions$class==test.transformed$class)
+```
+I jakieś wykresy jeszcze -- do opisania.
+```{r}
+lda.data <- cbind(train.transformed, predict(model)$x)
+```
+
+
+## Wnioski
+1. Podstawową różnicą między metodami jest to, że LDA jest metodą nadzorowaną (występuje wstępny podział na klasy), natomiast PCA jest nienadzorowana (nie posiada wstępnego podziału).
+
+2. Algorytm PCA opiera się na jednej macierzy kowariancji, natomiat LDA korzysta z macierzy opisujących zmienność wewnątrzgrupową i międzygrupową.
+
+3.Dla metody PCA otrzymaliśmy 2-wymiarowy podział na klasy, natomiast dla LDA jednowymiarowy. Dlatego ciężko jest wizualnie porównać obie metody.
