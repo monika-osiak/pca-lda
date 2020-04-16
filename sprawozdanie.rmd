@@ -1,0 +1,199 @@
+---
+title: "PCA vs LDA"
+author: "Monika Osiak, Anna Pręgowska, Patrycja Szczepaniak, Rafał Szulejko"
+date: "15 04 2020"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+spine <- read.csv("dataset-spine.csv")
+```
+## Wstęp
+Zadaniem było wykonanie analizy porównawczej metody wizualizacji PCA i LDA. Zadanie zostało wykonane na podstawie zbioru danych dotyczącego problemów z kręgosłupem. Zbiór posiada 2 klasy: normal i abnormal.
+
+## PCA
+
+Rozkład PCA dokonywany jest za pomocą metody `prcomp`.
+
+```{r pca}
+spine.pr <- prcomp(spine[c(1:12)], 
+                   center=TRUE, 
+                   scale=TRUE)
+```
+
+Następnie obliczamy wariancję w dwóch pierwszych składnikach wiodących.
+
+```{r variance}
+pc1_var <- as.double(summary(spine.pr)$importance[,1][2])
+pc2_var <- as.double(summary(spine.pr)$importance[,2][2])
+print(sprintf('Wariancja danych zawarta w pierwszym składniku wiodącym: %s%%', format(round(pc1_var, 2), nsmall = 2)))
+print(sprintf('Wariancja danych zawarta w drugim składniku wiodącym: %s%%', format(round(pc2_var, 2), nsmall = 2)))
+```
+
+Prezentacja pozostałych składników wiodących:
+
+```{r}
+screeplot(spine.pr, 
+          type="l", 
+          npcs=15, 
+          main="Screeplot of the first 10 PCs")
+abline(h=1, 
+       col="red", 
+       lty=5)
+legend("topright", 
+       legend=c("Eigenvalue = 1"),
+       col=c("red"), 
+       lty=5, 
+       cex=0.6)
+```
+
+Zgodnie z oczekiwaniami, łączna wariancja kolejnych składników zbliża się do jedności.
+
+```{r}
+cumpro <- cumsum(spine.pr$sdev^2 / sum(spine.pr$sdev^2))
+plot(cumpro[0:45], 
+     xlab="PC #",
+     ylab="Amount of explained variance", 
+     main="Cumulative variance plot")
+legend("topleft", 
+       legend=c("Cut-off @ PC6"),
+       col=c("blue"), 
+       lty=5, 
+       cex=0.6)
+```
+
+Po zredukowaniu danych do dwóch wymiarów otrzymujemy poniższy wykres:
+
+```{r}
+x_label <- sprintf('składnik wiodący 1: (%s%%)', format(round(pc1_var, 2), nsmall = 2))
+y_label <- sprintf('składnik wiodący 2: (%s%%)', format(round(pc2_var, 2), nsmall = 2))
+plot_title <- 'Dane po redukcji rozmiaru do dwóch wymiarów'
+plot(spine.pr$x[,1],
+     spine.pr$x[,2], 
+     xlab=x_label, 
+     ylab=y_label, 
+     main=plot_title)
+grid(nx=NULL,
+     ny=NULL, 
+     col="lightgray", 
+     lty="dotted")
+```
+```{r echo = FALSE, include=FALSE}
+library("factoextra")
+```
+
+Ostateczny wynik uzyskujemy po podziale na klasy.
+
+```{r}
+fviz_pca_ind(spine.pr, 
+             geom.ind="point", 
+             pointshape=21, 
+             pointsize=2, 
+             fill.ind=spine$class, 
+             col.ind="black", 
+             palette="jco", 
+             addEllipses=TRUE,
+             label="var",
+             col.var="black",
+             repel=TRUE,
+             legend.title="Class") +
+               ggtitle("Dane z zaznaczonymi klasami") +
+               theme(plot.title=element_text(hjust=0.5))
+```
+
+## LDA
+
+Rozkład LDA dokonywany jest za pomocą metody `lda`.
+
+```{r echo = FALSE, include=FALSE}
+library(tidyverse)
+library(caret)
+theme_set(theme_classic())
+```
+
+
+```{r echo = FALSE, include=FALSE}
+spine <- read.csv("dataset-spine.csv")[c(1:13)]
+spine.pr <- prcomp(spine[c(1:12)], 
+                   center=TRUE, 
+                   scale=TRUE)
+
+l1_var <- as.double(summary(spine.pr)$importance[,1][2])
+l2_var <- as.double(summary(spine.pr)$importance[,2][2])
+
+print(sprintf('Wariancja danych zawarta w pierwszym skĹ‚adniku wiodÄ…cym: %s%%', format(round(l1_var, 2), nsmall = 2)))
+print(sprintf('Wariancja danych zawarta w drugim skĹ‚adniku wiodÄ…cym: %s%%', format(round(l2_var, 2), nsmall = 2)))
+```
+Dane zostały już wcześniej wczytane. Dlatego zaczynamy od podziału zbioru na treningowy (80%) i testowy (20%).
+
+```{r divide set}
+set.seed(123)
+training.samples <- spine$class %>%
+  createDataPartition(p = 0.8, list = FALSE)
+
+train.data <- spine[training.samples, ]
+test.data <- spine[-training.samples, ]
+```
+
+Estymacja parametrów preprocesowania: 
+
+```{r estimation}
+preproc.param <- train.data %>% 
+  preProcess(method = c("center", "scale"))
+```
+
+Transformacja danych przy użyciu estymowanych parametrów:
+
+```{r transform}
+train.transformed <- preproc.param %>% predict(train.data)
+test.transformed <- preproc.param %>% predict(test.data)
+```
+
+```{r echo = FALSE, include=FALSE}
+require(MASS)
+```
+
+
+Dopasowanie modelu:
+```{r fitting}
+model <- lda(formula=class~., data=train.transformed)
+```
+
+```{r echo = FALSE, include=FALSE}
+print(model)
+```
+Prezentacja modelu z podziałem na klasy.
+```{r fitting 2}
+plot(model)
+```
+
+Wykonanie predykcji:
+```{r prediction2}
+predictions <- model %>% predict(train.transformed)
+```
+
+Wyznaczenie precyzji predykcji modelu:
+```{r precision}
+mean(predictions$class==test.transformed$class)
+```
+
+Wizualizacja funkcji dyskryminacji:
+```{r plot dicr function}
+
+```
+
+## Wnioski
+1. Podstawową różnicą między omawianymi metodami jest to, że LDA jest metodą nadzorowaną (występuje wstępny podział na klasy), natomiast PCA jest nienadzorowana (nie posiada wstępnego podziału).
+
+2. Algorytm PCA opiera się na jednej macierzy kowariancji, natomiat LDA korzysta z macierzy opisujących zmienność wewnątrzgrupową i międzygrupową.
+
+3. Wybraliśmy niestety zbiór, który okazał się trudny do liniowej eliminacji wymiarów i dla żadnej z metod nie otrzymaliśmy bardzo dobrych wyników.Jednak dla naszego modelu LDA lepiej sklasyfikowało dane.
+
+4. LDA zapewnia lepszą separację klas niż PCA. Dzieje się tak dlatego, że PCA skupia się przede wszystkim na śledzeniu wariancji danych, natomiast LDA na wariancjach międzyklasowych.
+
+5. LDA wymaga wcześniejszego przeprocesowania danych, przez co jest trudniejsze w użyciu. Równocześnie ze względu na jednowymiarowość wyników jest metodą trudną w prezentacji dla niewielkiej ilości klas.
+
+6. Przypuszczamy, że w większości sytuacji metoda LDA powinna dawać lepsze wyniki, jednakże wszystko zależy od omawianego przypadku i do każdego należy podejść indywidualnie.
