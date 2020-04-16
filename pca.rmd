@@ -106,17 +106,58 @@ fviz_pca_ind(spine.pr,
 
 Rozkład LDA dokonywany jest za pomocą metody `lda`.
 
-```{r}
-library(car)
-head(spine)
+```{r echo = FALSE, include=FALSE}
+library(tidyverse)
+library(caret)
+theme_set(theme_classic())
 ```
-```{r}
-scatterplotMatrix(spine[c(1:12)])
+Na początku załadowaliśmy dane ze wszystkimi kolumnamie -- również z podziałem na klasy.
+
+```{r loading data}
+spine <- read.csv("dataset-spine.csv")[c(1:13)]
+spine.pr <- prcomp(spine[c(1:12)], 
+                   center=TRUE, 
+                   scale=TRUE)
 ```
-```{r}
-library(MASS)
-spine.lda <- lda(class ~ ., data=spine)
+
+Następnie obliczamy wariancję w dwóch pierwszych składnikach wiodących.
+
+```{r variance}
+l1_var <- as.double(summary(spine.pr)$importance[,1][2])
+l2_var <- as.double(summary(spine.pr)$importance[,2][2])
+print(sprintf('Wariancja danych zawarta w pierwszym skĹ‚adniku wiodÄ…cym: %s%%', format(round(l1_var, 2), nsmall = 2)))
+print(sprintf('Wariancja danych zawarta w drugim skĹ‚adniku wiodÄ…cym: %s%%', format(round(l2_var, 2), nsmall = 2)))
 ```
-```{r}
-spine.lda
+
+Kolejnym krokiem jest podział zbioru na treningowy (80%) i testowy (20%).
+
+```{r divide set}
+set.seed(123)
+training.samples <- spine$class %>%
+  createDataPartition(p = 0.8, list = FALSE)
+
+train.data <- spine[training.samples, ]
+test.data <- spine[-training.samples, ]
+
+# Estimate preprocessing parameters
+preproc.param <- train.data %>% 
+  preProcess(method = c("center", "scale"))
+
+# Transform the data using the estimated parameters
+train.transformed <- preproc.param %>% predict(train.data)
+test.transformed <- preproc.param %>% predict(test.data)
+
+require(MASS)
+# Fit the model
+
+model <- lda(formula=class~., data=spine)
+model
+plot(model)
+# Make predictions
+predictions <- model %>% predict(train.transformed)
+# Model accuracy
+mean(predictions$class==test.transformed$class)
+
+predictions <- model %>% predict(test.transformed)
+
 ```
