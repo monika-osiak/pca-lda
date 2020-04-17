@@ -1659,9 +1659,11 @@ summary {
 <p>Następnie obliczamy wariancję w dwóch pierwszych składnikach wiodących.</p>
 <pre class="r"><code>pc1_var &lt;- as.double(summary(spine.pr)$importance[,1][2])
 pc2_var &lt;- as.double(summary(spine.pr)$importance[,2][2])
-print(sprintf(&#39;Wariancja danych zawarta w pierwszym składniku wiodącym: %s%%&#39;, format(round(pc1_var, 2), nsmall = 2)))</code></pre>
+print(sprintf(&#39;Wariancja danych zawarta w pierwszym składniku wiodącym: %s%%&#39;, 
+              format(round(pc1_var, 2), nsmall = 2)))</code></pre>
 <pre><code>## [1] &quot;Wariancja danych zawarta w pierwszym składniku wiodącym: 0.27%&quot;</code></pre>
-<pre class="r"><code>print(sprintf(&#39;Wariancja danych zawarta w drugim składniku wiodącym: %s%%&#39;, format(round(pc2_var, 2), nsmall = 2)))</code></pre>
+<pre class="r"><code>print(sprintf(&#39;Wariancja danych zawarta w drugim składniku wiodącym: %s%%&#39;, 
+              format(round(pc2_var, 2), nsmall = 2)))</code></pre>
 <pre><code>## [1] &quot;Wariancja danych zawarta w drugim składniku wiodącym: 0.10%&quot;</code></pre>
 <p>Prezentacja pozostałych składników wiodących:</p>
 <pre class="r"><code>screeplot(spine.pr, 
@@ -1777,7 +1779,7 @@ abline(v=0, lty=&quot;dotted&quot;, col=c(as.numeric(predictions$class)))</code>
 <li><p>Algorytm PCA opiera się na jednej macierzy kowariancji, natomiat LDA korzysta z macierzy opisujących zmienność wewnątrzgrupową i międzygrupową.</p></li>
 <li><p>Wybraliśmy niestety zbiór, który okazał się trudny do skutecznej liniowej eliminacji wymiarów, jednak dla naszego modelu LDA lepiej sklasyfikowało dane.</p></li>
 <li><p>LDA zapewnia lepszą separację klas niż PCA. Dzieje się tak dlatego, że PCA skupia się przede wszystkim na śledzeniu wariancji danych, natomiast LDA na wariancjach międzyklasowych.</p></li>
-<li><p>LDA wymaga wcześniejszego przeprocesowania danych, przez co jest trudniejsze w użyciu. Równocześnie ze względu na jednowymiarowość wyników jest metodą trudną w prezentacji dla niewielkiej ilości klas.</p></li>
+<li><p>LDA wymaga wcześniejszego preprocesowania danych, przez co jest trudniejsze w implementacji.</p></li>
 <li><p>Dla metody LDA największy wpływ na klasyfikację miały atrybuty pelvic_radius oraz degree_spondylolisthesis.</p></li>
 <li><p>Przypuszczamy, że w większości sytuacji metoda LDA powinna dawać lepsze wyniki, jednakże wszystko zależy od omawianego przypadku i do każdego należy podejść indywidualnie.</p></li>
 </ol>

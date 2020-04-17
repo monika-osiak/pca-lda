@@ -221,7 +221,7 @@ abline(v=0, lty="dotted", col=c(as.numeric(predictions$class)))
 
 4. LDA zapewnia lepszą separację klas niż PCA. Dzieje się tak dlatego, że PCA skupia się przede wszystkim na śledzeniu wariancji danych, natomiast LDA na wariancjach międzyklasowych.
 
-5. LDA wymaga wcześniejszego przeprocesowania danych, przez co jest trudniejsze w użyciu. Równocześnie ze względu na jednowymiarowość wyników jest metodą trudną w prezentacji dla niewielkiej ilości klas.
+5. LDA wymaga wcześniejszego preprocesowania danych, przez co jest trudniejsze w implementacji. 
 
 6. Dla metody LDA największy wpływ na klasyfikację miały atrybuty pelvic_radius oraz degree_spondylolisthesis.
 
