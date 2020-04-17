@@ -3,6 +3,7 @@ title: "PCA vs LDA"
 author: "Monika Osiak, Anna Pręgowska, Patrycja Szczepaniak, Rafał Szulejko"
 date: "15 04 2020"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---
@@ -32,8 +33,10 @@ Następnie obliczamy wariancję w dwóch pierwszych składnikach wiodących.
 ```{r variance}
 pc1_var <- as.double(summary(spine.pr)$importance[,1][2])
 pc2_var <- as.double(summary(spine.pr)$importance[,2][2])
-print(sprintf('Wariancja danych zawarta w pierwszym składniku wiodącym: %s%%', format(round(pc1_var, 2), nsmall = 2)))
-print(sprintf('Wariancja danych zawarta w drugim składniku wiodącym: %s%%', format(round(pc2_var, 2), nsmall = 2)))
+print(sprintf('Wariancja danych zawarta w pierwszym składniku wiodącym: %s%%', 
+              format(round(pc1_var, 2), nsmall = 2)))
+print(sprintf('Wariancja danych zawarta w drugim składniku wiodącym: %s%%', 
+              format(round(pc2_var, 2), nsmall = 2)))
 ```
 
 Prezentacja pozostałych składników wiodących:
