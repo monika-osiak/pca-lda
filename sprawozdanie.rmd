@@ -3,9 +3,9 @@ title: "PCA vs LDA"
 author: "Monika Osiak, Anna Pręgowska, Patrycja Szczepaniak, Rafał Szulejko"
 date: "15 04 2020"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
-  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -46,9 +46,6 @@ screeplot(spine.pr,
           type="l", 
           npcs=15, 
           main="Screeplot of the first 10 PCs")
-abline(h=1, 
-       col="red", 
-       lty=5)
 ```
 
 Zgodnie z oczekiwaniami, łączna wariancja kolejnych składników zbliża się do jedności.
