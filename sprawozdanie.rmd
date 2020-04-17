@@ -3,9 +3,9 @@ title: "PCA vs LDA"
 author: "Monika Osiak, Anna Pręgowska, Patrycja Szczepaniak, Rafał Szulejko"
 date: "15 04 2020"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -49,11 +49,6 @@ screeplot(spine.pr,
 abline(h=1, 
        col="red", 
        lty=5)
-legend("topright", 
-       legend=c("Eigenvalue = 1"),
-       col=c("red"), 
-       lty=5, 
-       cex=0.6)
 ```
 
 Zgodnie z oczekiwaniami, łączna wariancja kolejnych składników zbliża się do jedności.
@@ -166,11 +161,9 @@ require(MASS)
 Dopasowanie modelu:
 ```{r fitting}
 model <- lda(formula=class~., data=train.transformed)
-```
-
-```{r echo = FALSE, include=FALSE}
 print(model)
 ```
+
 Prezentacja modelu z podziałem na klasy.
 ```{r fitting 2}
 plot(model)
@@ -190,7 +183,7 @@ Wizualizacja funkcji dyskryminacji:
 ```{r plot dicr function}
 plot_title <- ''
 plot(predictions$x[,1],
-     ylab="LD1", 
+     ylab="Wartosc predykcji",
      main=plot_title)
 grid(nx=NULL,
      ny=NULL, 
@@ -226,3 +219,5 @@ abline(v=0, lty="dotted", col=c(as.numeric(predictions$class)))
 6. Dla metody LDA największy wpływ na klasyfikację miały atrybuty pelvic_radius oraz degree_spondylolisthesis.
 
 7. Przypuszczamy, że w większości sytuacji metoda LDA powinna dawać lepsze wyniki, jednakże wszystko zależy od omawianego przypadku i do każdego należy podejść indywidualnie.
+
+8. Metody PCA i LDA nie muszą konkurować, można wykorzystać obie, żeby uzyskać szerszą perspektywę i zrozumienie zagadnienia.
